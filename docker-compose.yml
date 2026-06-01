@@ -1,0 +1,48 @@
+services:
+  # Servidor Web + PHP
+  app:
+    build: .
+    container_name: api_php_server_recetas
+    restart: always
+
+    ports:
+      - "8080:80"
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/vhost.conf:/etc/apache2/sites-available/000-default.conf
+    networks:
+      - api_network
+    depends_on:
+      - db
+
+  # Base de Datos
+  db:
+    image: mariadb:latest
+    container_name: api_db_recetas
+    restart: always
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./db_data:/var/lib/mysql
+      # Script inicial con tus tablas de Temas y Preguntas
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - api_network
+
+  # Administrador de BD (Opcional, muy útil)
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: api_pma_recetas
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+    networks:
+      - api_network
+
+networks:
+  api_network:
+    driver: bridge
