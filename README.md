@@ -56,15 +56,18 @@ docker compose up -d --build
 
 La API responde por defecto en el **puerto 8080**. Todas las respuestas se devuelven en formato **JSON** con codificación **UTF-8**.
 
-| Método     | Endpoint                   | Descripción                                              | Parámetros / Cuerpo (JSON)         |
-| :--------- | :------------------------- | :------------------------------------------------------- | :--------------------------------- |
-| **GET**    | `/recetas`                 | Listado general paginado (20 por página) o buscador.     | `?pagina=1` o `?nombre=ALBÓNDIGAS` |
-| **GET**    | `/receta`                  | Obtener una receta específica mediante su ID único.      | `?id=5`                            |
-| **GET**    | `/receta/detalle`          | Obtener una receta específica mediante su nombre exacto. | `?nombre=Nombre de la receta`      |
-| **POST**   | `/receta/crear`            | Insertar una nueva receta junto con sus ingredientes.    | _Ver formato JSON abajo_           |
-| **PUT**    | `/receta/actualizar`       | Modificar los datos o ingredientes de una receta.        | _Ver formato JSON abajo_           |
-| **DELETE** | `/receta/eliminar`         | Eliminar una receta y sus relaciones en cascada.         | `?nombre=Nombre de la receta`      |
-| **GET**    | `/recetas/por-ingrediente` | Buscar recetas por ingrediente con paginación.           | `?nombre=Huevo&pagina=2`           |
+| Método     | Endpoint                              | Descripción                                                                                    | Parámetros / Cuerpo (JSON)         |
+| :--------- | :------------------------------------ | :--------------------------------------------------------------------------------------------- | :--------------------------------- |
+| **GET**    | `/recetas`                            | Listado general paginado (20 por página) o buscador.                                           | `?pagina=1` o `?nombre=ALBÓNDIGAS` |
+| **GET**    | `/receta`                             | Obtener una receta específica mediante su ID único.                                            | `?id=5`                            |
+| **GET**    | `/receta/detalle`                     | Obtener una receta específica mediante su nombre exacto.                                       | `?nombre=Nombre de la receta`      |
+| **POST**   | `/receta/crear`                       | Insertar una nueva receta junto con sus ingredientes.                                          | _Ver formato JSON abajo_           |
+| **PUT**    | `/receta/actualizar`                  | Modificar los datos o ingredientes de una receta.                                              | _Ver formato JSON abajo_           |
+| **DELETE** | `/receta/eliminar`                    | Eliminar una receta y sus relaciones en cascada.                                               | `?nombre=Nombre de la receta`      |
+| **GET**    | `/recetas/por-ingrediente`            | Buscar recetas por ingrediente con paginación.                                                 | `?nombre=Huevo&pagina=2`           |
+| **`GET`**  | `/recetas/por-ingrediente`            | Buscar recetas que contengan un ingrediente específico (Paginado).                             | `?nombre=Tomate&pagina=1`          |
+| **`GET`**  | `/recetas/por-ingredientes-multiples` | Buscar recetas que contengan TODOS los ingredientes indicados (Paginado).                      | `?nombres=Pollo,Arroz&pagina=1`    |
+| **`GET`**  | `/recetas/sin-ingredientes-multiples` | Excluir recetas que contengan AL MENOS UNO de los ingredientes (Paginado con conteo absoluto). | `?nombres=Queso,Leche&pagina=1`    |
 
 ---
 
