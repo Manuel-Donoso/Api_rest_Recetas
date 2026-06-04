@@ -420,6 +420,85 @@ elseif ($metodo === 'GET' && $ruta === '/recetas/por-ingredientes-multiples') {
 }
 
 // -------------------------------------------------------------------------
+// 9.GET /recetas/sin-ingredientes-multiples (CON PAGINACIÓN)
+// GET /recetas/sin-ingredientes-multiples?nombres=Harina,Almendras&pagina=1
+// -------------------------------------------------------------------------
+elseif ($metodo === 'GET' && $ruta === '/recetas/sin-ingredientes-multiples') {
+    
+    $nombresInput = $_GET['nombres'] ?? null;
+    if (!$nombresInput) responderError(400, "Falta el parámetro 'nombres' a excluir (separados por comas).");
+
+    $listaExcluir = array_map('trim', explode(',', $nombresInput));
+
+    $limite = 20;
+    $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    if ($pagina < 1) $pagina = 1;
+    $offset = ($pagina - 1) * $limite;
+
+try {
+        $placeholders = [];
+        $params = [];
+        foreach ($listaExcluir as $index => $ingrediente) {
+            $key = "excluir" . $index;
+            $placeholders[] = ":" . $key;
+            $params[$key] = $ingrediente;
+        }
+        $strPlaceholders = implode(', ', $placeholders);
+
+        // --- 1. CONTAR EL TOTAL REAL MULTIPLE ---
+        $sqlContar = "SELECT COUNT(*) FROM recetas 
+                      WHERE nombre NOT IN (
+                          SELECT ri.fk_nombre_receta 
+                          FROM recetas_ingredientes ri
+                          JOIN ingredientes i ON ri.fk_id_ingrediente = i.id
+                          WHERE i.nombre IN ($strPlaceholders)
+                      )";
+        $stmtContar = $pdo->prepare($sqlContar);
+        foreach ($params as $key => $val) {
+            $stmtContar->bindValue(':' . $key, $val, PDO::PARAM_STR);
+        }
+        $stmtContar->execute();
+        $totalRegistros = (int)$stmtContar->fetchColumn();
+
+        // --- 2. TRAER LOS 20 DE LA PÁGINA ---
+        $sql = "SELECT id, nombre, calorias, rutaImagen 
+                FROM recetas 
+                WHERE nombre NOT IN (
+                    SELECT ri.fk_nombre_receta 
+                    FROM recetas_ingredientes ri
+                    JOIN ingredientes i ON ri.fk_id_ingrediente = i.id
+                    WHERE i.nombre IN ($strPlaceholders)
+                )
+                LIMIT :limite OFFSET :offset";
+        
+        $stmt = $pdo->prepare($sql);
+        foreach ($params as $key => $val) {
+            $stmt->bindValue(':' . $key, $val, PDO::PARAM_STR);
+        }
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        $resultados = $stmt->fetchAll();
+
+        // --- 3. METADATOS ---
+        $totalPaginas = ceil($totalRegistros / $limite);
+
+        responderExito([
+            "ingredientes_excluidos" => $listaExcluir,
+            "pagina_actual"          => $pagina,
+            "por_pagina"             => $limite,
+            "total_paginas"          => $totalPaginas,
+            "total_encontrados"      => $totalRegistros,   // 👈 ¡Total absoluto!
+            "contador_pagina"        => count($resultados), // 👈 Los de esta página
+            "recetas"                => $resultados
+        ]);
+
+    } catch (\PDOException $e) {
+        responderError(500, "Error en la exclusión múltiple: " . $e->getMessage());
+    }
+}
+
+// -------------------------------------------------------------------------
 // RUTA POR DEFECTO (404)
 // -------------------------------------------------------------------------
 else {

@@ -1,0 +1,14 @@
+info:
+  name: sin ingredientes
+  type: http
+  seq: 19
+
+http:
+  method: get
+  url: ""
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
