@@ -1,0 +1,21 @@
+info:
+  name: buscar por ingrediente
+  type: http
+
+http:
+  method: GET
+  url: http://localhost:8080/recetas/por-ingrediente?nombre=Tomate&pagina=1
+  params:
+    - name: nombre
+      value: Tomate
+      type: query
+    - name: pagina
+      value: "1"
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

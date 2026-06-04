@@ -300,11 +300,69 @@ elseif ($metodo === 'GET' && $ruta === '/receta') {
 }
 
 // -------------------------------------------------------------------------
+// ENDPOINT: GET /recetas/por-ingrediente (AHORA CON PAGINACIÓN)
+// GET /recetas/por-ingrediente?nombre=Tomate&pagina=2
+// -------------------------------------------------------------------------
+elseif ($metodo === 'GET' && $ruta === '/recetas/por-ingrediente') {
+    
+    $nombreIngrediente = $_GET['nombre'] ?? null;
+
+    if (!$nombreIngrediente) {
+        responderError(400, "Falta el parámetro obligatorio 'nombre' del ingrediente a buscar.");
+    }
+
+    // Configuración de la paginación
+    $limite = 20; // 20 recetas por página
+    $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    if ($pagina < 1) $pagina = 1;
+    
+    $offset = ($pagina - 1) * $limite;
+
+    try {
+        // Estructuramos la consulta con parámetros para LIMIT y OFFSET
+        $sql = "SELECT r.id, r.nombre, r.calorias, r.rutaImagen 
+                FROM recetas r
+                JOIN recetas_ingredientes ri ON r.nombre = ri.fk_nombre_receta
+                JOIN ingredientes i ON ri.fk_id_ingrediente = i.id
+                WHERE i.nombre LIKE :ingrediente
+                LIMIT :limite OFFSET :offset";
+        
+        $stmt = $pdo->prepare($sql);
+        
+        // Enlazamos el texto del ingrediente
+        $stmt->bindValue(':ingrediente', "%$nombreIngrediente%", PDO::PARAM_STR);
+        // Obligatorio enlazar como INT para que MariaDB no falle con el LIMIT
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        $resultados = $stmt->fetchAll();
+
+        // Devolvemos los datos junto con los metadatos de la página actual
+        responderExito([
+            "busqueda_ingrediente" => $nombreIngrediente,
+            "pagina_actual"        => $pagina,
+            "por_pagina"           => $limite,
+            "contador_recibido"    => count($resultados),
+            "recetas"              => $resultados
+        ]);
+
+    } catch (\PDOException $e) {
+        responderError(500, "Error al buscar recetas por ingrediente: " . $e->getMessage());
+    }
+}
+
+
+
+// -------------------------------------------------------------------------
 // RUTA POR DEFECTO (404)
 // -------------------------------------------------------------------------
 else {
     responderError(404, "Endpoint no encontrado o método HTTP no soportado.");
 }
+
+
+
 
 // -------------------------------------------------------------------------
 // FUNCIONES AUXILIARES DE RESPUESTA
