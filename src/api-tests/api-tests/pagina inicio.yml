@@ -1,0 +1,14 @@
+info:
+  name: pagina inicio
+  type: http
+
+http:
+  method: GET
+  url: http://localhost:8080/recetas
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

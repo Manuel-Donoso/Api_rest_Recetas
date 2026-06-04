@@ -1,0 +1,18 @@
+info:
+  name: eliminar
+  type: http
+
+http:
+  method: DELETE
+  url: http://localhost:8080/receta/eliminar?nombre=Tortilla de Patatas API
+  params:
+    - name: nombre
+      value: Tortilla de Patatas API
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

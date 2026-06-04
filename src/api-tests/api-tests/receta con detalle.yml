@@ -1,0 +1,18 @@
+info:
+  name: receta con detalle
+  type: http
+
+http:
+  method: GET
+  url: http://localhost:8080/receta/detalle?nombre=ROLLITOS DE LECHUGA CON POLLO Y AGUACATE
+  params:
+    - name: nombre
+      value: ROLLITOS DE LECHUGA CON POLLO Y AGUACATE
+      type: query
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

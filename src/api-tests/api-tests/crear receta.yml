@@ -1,0 +1,34 @@
+info:
+  name: crear receta
+  type: http
+
+http:
+  method: POST
+  url: http://localhost:8080/receta/crear
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Tortilla de Patatas API",
+        "calorias": 400,
+        "carbohidratos": 30,
+        "proteinas": 15,
+        "grasas": 25,
+        "fibra": 3,
+        "azucares": 1,
+        "pasos": "1. Freír las patatas con cebolla. 2. Batir los huevos. 3. Cuajar la tortilla en la sartén.",
+        "consejos": "No la dejes demasiado hecha si te gusta jugosa.",
+        "rutaImagen": "tortilla.jpg",
+        "ingredientes": [
+          { "nombre": "Huevo", "cantidad": 4, "unidadMedida": "unidades" },
+          { "nombre": "Patata", "cantidad": 500, "unidadMedida": "gramos" },
+          { "nombre": "Cebolla", "cantidad": 0.5, "unidadMedida": "unidad" }
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

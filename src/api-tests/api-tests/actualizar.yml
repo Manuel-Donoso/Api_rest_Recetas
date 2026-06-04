@@ -1,0 +1,35 @@
+info:
+  name: actualizar
+  type: http
+
+http:
+  method: PUT
+  url: http://localhost:8080/receta/actualizar
+  body:
+    type: json
+    data: |-
+      {
+        "nombre": "Tortilla de Patatas API",
+        "calorias": 350,
+        "carbohidratos": 25,
+        "proteinas": 15,
+        "grasas": 20,
+        "fibra": 3,
+        "azucares": 1,
+        "pasos": "1. Freír patatas y cebolla. 2. Batir huevos. 3. Mezclar todo con un toque de sal y cuajar al gusto.",
+        "consejos": "¡Ahora con menos calorías y más jugosa!",
+        "rutaImagen": "tortilla_perfecta.jpg",
+        "ingredientes": [
+          { "nombre": "Huevo", "cantidad": 4, "unidadMedida": "unidades" },
+          { "nombre": "Patata", "cantidad": 500, "unidadMedida": "gramos" },
+          { "nombre": "Cebolla", "cantidad": 0.5, "unidadMedida": "unidad" },
+          { "nombre": "Sal", "cantidad": 1, "unidadMedida": "pizca" } 
+        ]
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
