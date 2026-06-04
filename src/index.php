@@ -256,7 +256,7 @@ elseif ($metodo === 'DELETE' && $ruta === '/receta/eliminar') {
 
 
 // -------------------------------------------------------------------------
-// GET /receta - OBTENER UNA RECETA POR SU ID (CON INGREDIENTES)
+//6. GET /receta - OBTENER UNA RECETA POR SU ID (CON INGREDIENTES)
 // GET /receta?id=15
 // -------------------------------------------------------------------------
 elseif ($metodo === 'GET' && $ruta === '/receta') {
@@ -300,7 +300,7 @@ elseif ($metodo === 'GET' && $ruta === '/receta') {
 }
 
 // -------------------------------------------------------------------------
-// ENDPOINT: GET /recetas/por-ingrediente (AHORA CON PAGINACIÓN)
+//7. GET /recetas/por-ingrediente (AHORA CON PAGINACIÓN)
 // GET /recetas/por-ingrediente?nombre=Tomate&pagina=2
 // -------------------------------------------------------------------------
 elseif ($metodo === 'GET' && $ruta === '/recetas/por-ingrediente') {
@@ -352,7 +352,72 @@ elseif ($metodo === 'GET' && $ruta === '/recetas/por-ingrediente') {
     }
 }
 
+// -------------------------------------------------------------------------
+//8. GET /recetas/por-ingredientes-multiples (CON PAGINACIÓN)
+// GET /recetas/por-ingredientes-multiples?nombres=Pollo,Arroz&pagina=1
+// -------------------------------------------------------------------------
+elseif ($metodo === 'GET' && $ruta === '/recetas/por-ingredientes-multiples') {
+    
+    $nombresInput = $_GET['nombres'] ?? null;
+    if (!$nombresInput) responderError(400, "Falta el parámetro 'nombres' (separados por comas).");
 
+    // Convertimos "Pollo,Arroz" en un array: ['Pollo', 'Arroz']
+    $listaIngredientes = array_map('trim', explode(',', $nombresInput));
+    $totalIngredientesBuscados = count($listaIngredientes);
+
+    $limite = 20;
+    $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    if ($pagina < 1) $pagina = 1;
+    $offset = ($pagina - 1) * $limite;
+
+    try {
+        // Creamos tantos marcadores (? o :param) como ingredientes haya en la lista
+        // Ejemplo: :ing0, :ing1... para evitar inyección SQL
+        $placeholders = [];
+        $params = [];
+        foreach ($listaIngredientes as $index => $ingrediente) {
+            $key = "ing" . $index;
+            $placeholders[] = ":" . $key;
+            $params[$key] = $ingrediente; // Buscamos coincidencia exacta o con % si prefieres LIKE
+        }
+        $strPlaceholders = implode(', ', $placeholders);
+
+        // SQL: Agrupamos por receta y filtramos con HAVING para asegurar que tiene TODOS los ingredientes
+        $sql = "SELECT r.id, r.nombre, r.calorias, r.rutaImagen 
+                FROM recetas r
+                JOIN recetas_ingredientes ri ON r.nombre = ri.fk_nombre_receta
+                JOIN ingredientes i ON ri.fk_id_ingrediente = i.id
+                WHERE i.nombre IN ($strPlaceholders)
+                GROUP BY r.id, r.nombre, r.calorias, r.rutaImagen
+                HAVING COUNT(DISTINCT i.id) = :total_buscado
+                LIMIT :limite OFFSET :offset";
+        
+        $stmt = $pdo->prepare($sql);
+        
+        // Enlazamos los ingredientes dinámicos
+        foreach ($params as $key => $val) {
+            $stmt->bindValue(':' . $key, $val, PDO::PARAM_STR);
+        }
+        
+        // Enlazamos paginación y el contador del HAVING
+        $stmt->bindValue(':total_buscado', $totalIngredientesBuscados, PDO::PARAM_INT);
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        $resultados = $stmt->fetchAll();
+
+        responderExito([
+            "ingredientes_buscados" => $listaIngredientes,
+            "pagina_actual"         => $pagina,
+            "contador_recibido"     => count($resultados),
+            "recetas"               => $resultados
+        ]);
+
+    } catch (\PDOException $e) {
+        responderError(500, "Error en la búsqueda múltiple: " . $e->getMessage());
+    }
+}
 
 // -------------------------------------------------------------------------
 // RUTA POR DEFECTO (404)
