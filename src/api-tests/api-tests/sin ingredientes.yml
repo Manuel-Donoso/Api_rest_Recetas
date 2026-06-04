@@ -5,7 +5,14 @@ info:
 
 http:
   method: get
-  url: ""
+  url: http://localhost:8080/recetas/sin-ingredientes-multiples?nombres=Calabacín,Perejil fresco&pagina=1
+  params:
+    - name: nombres
+      value: Calabacín,Perejil fresco
+      type: query
+    - name: pagina
+      value: "1"
+      type: query
 
 settings:
   encodeUrl: true
