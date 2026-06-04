@@ -1,6 +1,7 @@
 -- Crear Tabla de Recetas (con nombre como PK)
 CREATE TABLE IF NOT EXISTS recetas (
-    nombre VARCHAR(255) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(255) UNIQUE,
     calorias INT NOT NULL,
     carbohidratos INT NOT NULL,
     proteinas INT NOT NULL,  
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS recetas (
 -- Crear tabla de Ingredientes
 CREATE TABLE IF NOT EXISTS ingredientes (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(255) NOT NULL
+    nombre VARCHAR(255) NOT NULL UNIQUE
 ) ENGINE=InnoDB;
 
 -- Crear tabla de Recetas_Ingredientes (relación muchos a muchos)
